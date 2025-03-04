@@ -3,7 +3,7 @@ $projectPath = "f:/SPTarkov-Custom-Mods/TomasinoMod"
 $outputPath = "f:/SPTarkov-Custom-Mods/TomasinoMod/bin/Release"
 $zipFilePath = "f:/SPTarkov-Custom-Mods/PantsMod.zip"
 $readmeFilePath = "f:/SPTarkov-Custom-Mods/README.md"
-$tempDir = "f:/SPTarkov-Custom-Mods/temp"
+$tempDir = "f:/SPTarkov-Custom-Mods/TomasinoMod/temp"
 
 # Clean previous build
 if (Test-Path $outputPath) {
