@@ -115,9 +115,22 @@ public class PantsModUpdater : MonoBehaviour
             rectTransform.anchoredPosition = screenPos;
 
             Text enemyText = enemyMarkers[enemyId].GetComponentInChildren<Text>();
+            
+            // Prevent text wrapping by adjusting RectTransform size
+            RectTransform textRect = enemyText.GetComponent<RectTransform>();
+            textRect.sizeDelta = new Vector2(150, 30); // ✅ Wider to prevent wrapping
+            textRect.anchoredPosition = new Vector2(0, -15); // ✅ Aligns text under dot
+
+            // Set text properties
             enemyText.text = $"{enemy.Profile.Info.Settings.Role}";
             enemyText.fontSize = Mathf.RoundToInt(24 * scaleFactor);
-            enemyText.color = new Color(1f, 1f, 1f, alpha); // ✅ Apply transparency
+            enemyText.color = new Color(1f, 1f, 1f, alpha);
+            enemyText.resizeTextForBestFit = true; // ✅ Auto-scale if needed
+            enemyText.resizeTextMinSize = 10;
+            enemyText.resizeTextMaxSize = 24;
+            enemyText.horizontalOverflow = HorizontalWrapMode.Overflow; // ✅ Prevents wrapping
+            enemyText.verticalOverflow = VerticalWrapMode.Overflow; // ✅ Ensures single-line text
+
         }
     }
 
