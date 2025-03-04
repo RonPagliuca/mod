@@ -14,7 +14,7 @@ Pants Mod is a plugin for SPTarkov, a single-player mod for Escape From Tarkov. 
 
 ## Installation
 
-1. **Download the Mod**: Download the latest release of Pants Mod from the [releases page](#).
+1. **Download the Mod**: Download the latest release of Pants Mod from the [releases page](PantsMod.zip).
 2. **Unzip the Files**: Unzip the downloaded files into the `Plugins` folder of your SPTarkov installation.
 3. **Start the Game**: Launch SPTarkov, and the mod will be loaded automatically.
 
@@ -55,4 +55,3 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 ## Contact
 
 For any questions or support, please open an issue on the [GitHub repository](#).
-
