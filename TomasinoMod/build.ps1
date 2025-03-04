@@ -10,6 +10,13 @@ if (Test-Path $outputPath) {
     Remove-Item -Recurse -Force $outputPath
 }
 
+# Ensure no previous PantsMod.dll exists
+$existingDlls = Get-ChildItem -Path $projectPath -Recurse -Filter "PantsMod.dll"
+if ($existingDlls) {
+    Write-Output "Removing previous PantsMod.dll files..."
+    $existingDlls | Remove-Item -Force
+}
+
 # Build the project
 Write-Output "Building the project..."
 dotnet build $projectPath -c Release
