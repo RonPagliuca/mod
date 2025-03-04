@@ -3,6 +3,7 @@ $projectPath = "f:/SPTarkov-Custom-Mods/TomasinoMod"
 $outputPath = "f:/SPTarkov-Custom-Mods/TomasinoMod/bin/Release"
 $zipFilePath = "f:/SPTarkov-Custom-Mods/PantsMod.zip"
 $readmeFilePath = "f:/SPTarkov-Custom-Mods/README.md"
+$tempDir = "f:/SPTarkov-Custom-Mods/temp"
 
 # Clean previous build
 if (Test-Path $outputPath) {
@@ -34,13 +35,24 @@ if (-Not (Test-Path $dllPath)) {
     exit 1
 }
 
-# Create the ZIP file with only PantsMod.dll
+# Prepare the temporary directory for the ZIP file
+if (Test-Path $tempDir) {
+    Write-Output "Cleaning temporary directory..."
+    Remove-Item -Recurse -Force $tempDir
+}
+New-Item -ItemType Directory -Path $tempDir
+New-Item -ItemType Directory -Path (Join-Path $tempDir "BepInEx\plugins")
+
+# Copy the DLL to the temporary directory
+Copy-Item -Path $dllPath -Destination (Join-Path $tempDir "BepInEx\plugins")
+
+# Create the ZIP file with the correct directory structure
 if (Test-Path $zipFilePath) {
     Write-Output "Removing existing ZIP file..."
     Remove-Item -Force $zipFilePath
 }
 Write-Output "Creating ZIP file..."
-Compress-Archive -Path $dllPath -DestinationPath $zipFilePath
+Compress-Archive -Path "$tempDir\*" -DestinationPath $zipFilePath
 
 # Verify the ZIP file was created
 if (-Not (Test-Path $zipFilePath)) {
