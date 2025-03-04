@@ -2,15 +2,15 @@
 
 ## Overview
 
-Pants Mod is a plugin for SPTarkov, a single-player mod for Escape From Tarkov. This mod enhances the gameplay experience by adding dynamic enemy markers on the screen, which display the role of AI enemies. The markers adjust their size and transparency based on the distance from the player, providing a clear and informative visual aid during gameplay.
+Pants Mod is a plugin for SPTarkov, a single-player mod for Escape From Tarkov. This mod enhances the gameplay experience by adding dynamic enemy markers on the screen, which display the role of AI enemies. The markers adjust their color, size and transparency based on the distance from the player, providing a clear and informative visual aid during gameplay.
 
 ## Features
 
 - **Dynamic Enemy Markers**: Displays markers for AI enemies on the screen.
 - **Distance-Based Scaling**: Marker size adjusts based on the distance to the enemy.
-- **Distance-Based Transparency**: Marker transparency adjusts based on the distance to the enemy.
-- **Role Display**: Shows the role of the enemy (e.g., Scav, Raider) on the marker.
-- **Auto-Scaling Text**: Text size adjusts to fit within the marker without wrapping.
+- **Distance-Based Transparency and Color**: Marker transparency adjusts based on the distance to the enemy.
+- **Stats Display**: Shows the role of the enemy (e.g., Scav, Raider), distance, hp, and level on the marker.
+- **Toggle Effect**: Using ctrl-shift-m turn toggle markers off and on.
 
 ## Installation
 
@@ -19,7 +19,6 @@ Pants Mod is a plugin for SPTarkov, a single-player mod for Escape From Tarkov. 
 3. **Start the Game**: Launch SPTarkov, and the mod will be loaded automatically.
 
 ## Bugs
-- Enemy Name Tags are a bit off depending on how quickly you look around, slower the better.
 
 ## How It Works
 
