@@ -40,45 +40,45 @@
   <ItemGroup>
     <!-- ✅ Reference BepInEx (Ensure path is correct for your SPT install) -->
     <Reference Include="BepInEx">
-      <HintPath>$(SolutionDir)SPT\BepInEx\core\BepInEx.dll</HintPath>
+      <HintPath>..\..\SPT\BepInEx\core\BepInEx.dll</HintPath>
     </Reference>
 
     <!-- ✅ Reference Harmony (Patch Library) -->
     <Reference Include="0Harmony">
-      <HintPath>$(SolutionDir)SPT\BepInEx\core\0Harmony.dll</HintPath>
+      <HintPath>..\..\SPT\BepInEx\core\0Harmony.dll</HintPath>
     </Reference>
 
     <!-- ✅ Reference Unity Engine Modules -->
     <Reference Include="UnityEngine">
-      <HintPath>$(SolutionDir)SPT\EscapeFromTarkov_Data\Managed\UnityEngine.dll</HintPath>
+      <HintPath>..\..\SPT\EscapeFromTarkov_Data\Managed\UnityEngine.dll</HintPath>
     </Reference>
 
     <Reference Include="UnityEngine.CoreModule">
-      <HintPath>$(SolutionDir)SPT\EscapeFromTarkov_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <HintPath>..\..\SPT\EscapeFromTarkov_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
 
     <Reference Include="UnityEngine.UIModule">
-      <HintPath>$(SolutionDir)SPT\EscapeFromTarkov_Data\Managed\UnityEngine.UIModule.dll</HintPath>
+      <HintPath>..\..\SPT\EscapeFromTarkov_Data\Managed\UnityEngine.UIModule.dll</HintPath>
     </Reference>
 
     <Reference Include="UnityEngine.UI">
-      <HintPath>$(SolutionDir)SPT\EscapeFromTarkov_Data\Managed\UnityEngine.UI.dll</HintPath>
+      <HintPath>..\..\SPT\EscapeFromTarkov_Data\Managed\UnityEngine.UI.dll</HintPath>
     </Reference>
 
     <Reference Include="UnityEngine.TextRenderingModule">
-      <HintPath>$(SolutionDir)SPT\EscapeFromTarkov_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
+      <HintPath>..\..\SPT\EscapeFromTarkov_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
     </Reference>
 
     <Reference Include="UnityEngine.InputLegacyModule">
-      <HintPath>$(SolutionDir)SPT\EscapeFromTarkov_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
+      <HintPath>..\..\SPT\EscapeFromTarkov_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
     </Reference>
 
     <Reference Include="Assembly-CSharp">
-        <HintPath>F:\SPT\EscapeFromTarkov_Data\Managed\Assembly-CSharp.dll</HintPath>
+        <HintPath>..\..\SPT\EscapeFromTarkov_Data\Managed\Assembly-CSharp.dll</HintPath>
     </Reference>
 
     <Reference Include="Comfort">
-        <HintPath>F:\SPT\EscapeFromTarkov_Data\Managed\Comfort.dll</HintPath>
+        <HintPath>..\..\SPT\EscapeFromTarkov_Data\Managed\Comfort.dll</HintPath>
     </Reference>
 
   </ItemGroup>
