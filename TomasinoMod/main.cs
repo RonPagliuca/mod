@@ -35,6 +35,7 @@ public class PantsModUpdater : MonoBehaviour
 {
     private GameObject uiCanvas = null; // Reference to the UI canvas.
     private Dictionary<int, GameObject> enemyMarkers = new Dictionary<int, GameObject>(); // Dictionary to store enemy markers.
+    private bool isEnabled = true; // Flag to control the functionality.
 
     // Method called when the updater starts.
     private void Start()
@@ -46,6 +47,20 @@ public class PantsModUpdater : MonoBehaviour
     // Method called every frame.
     private void Update()
     {
+        // Check for key press Ctrl+Shift+M to toggle the functionality
+        if (Input.GetKey(KeyCode.LeftControl) && Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.M))
+        {
+            isEnabled = !isEnabled; // Toggle the flag
+            PantsMod.LogToFile($"PantsModUpdater functionality {(isEnabled ? "enabled" : "disabled")}"); // Log the change
+        }
+
+        if (!isEnabled)
+        {
+            foreach (var enemyMarker in enemyMarkers.Values)
+                enemyMarker.SetActive(false); // Deactivate all enemy markers if disabled
+            return; // Do nothing if the functionality is disabled
+        }
+
         if (Singleton<GameWorld>.Instance == null || Singleton<GameWorld>.Instance.MainPlayer == null)
         {
             return; // If the game world or main player is not available, do nothing.
