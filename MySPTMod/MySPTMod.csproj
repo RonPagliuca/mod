@@ -1,0 +1,94 @@
+﻿<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>10.0.0</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{YOUR-GUID-HERE}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>MySPTMod</RootNamespace>
+    <AssemblyName>MySPTMod</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>  <!-- ✅ Correct .NET version -->
+    <FileAlignment>512</FileAlignment>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <LangVersion>latest</LangVersion>  <!-- ✅ Ensures latest C# features -->
+    <BaseOutputPath>bin\</BaseOutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <Optimize>false</Optimize>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- ✅ Automatically includes all .cs files -->
+    <Compile Include="*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- ✅ Reference BepInEx (Ensure path is correct for your SPT install) -->
+    <Reference Include="BepInEx">
+      <HintPath>$(SolutionDir)SPT\BepInEx\core\BepInEx.dll</HintPath>
+    </Reference>
+
+    <!-- ✅ Reference Harmony (Patch Library) -->
+    <Reference Include="0Harmony">
+      <HintPath>$(SolutionDir)SPT\BepInEx\core\0Harmony.dll</HintPath>
+    </Reference>
+
+    <!-- ✅ Reference Unity Engine Modules -->
+    <Reference Include="UnityEngine">
+      <HintPath>$(SolutionDir)SPT\EscapeFromTarkov_Data\Managed\UnityEngine.dll</HintPath>
+    </Reference>
+
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>$(SolutionDir)SPT\EscapeFromTarkov_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+    </Reference>
+
+    <Reference Include="UnityEngine.UIModule">
+      <HintPath>$(SolutionDir)SPT\EscapeFromTarkov_Data\Managed\UnityEngine.UIModule.dll</HintPath>
+    </Reference>
+
+    <Reference Include="UnityEngine.UI">
+      <HintPath>$(SolutionDir)SPT\EscapeFromTarkov_Data\Managed\UnityEngine.UI.dll</HintPath>
+    </Reference>
+
+    <Reference Include="UnityEngine.TextRenderingModule">
+      <HintPath>$(SolutionDir)SPT\EscapeFromTarkov_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
+    </Reference>
+
+    <Reference Include="UnityEngine.InputLegacyModule">
+      <HintPath>$(SolutionDir)SPT\EscapeFromTarkov_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
+    </Reference>
+
+    <Reference Include="Assembly-CSharp">
+        <HintPath>F:\SPT\EscapeFromTarkov_Data\Managed\Assembly-CSharp.dll</HintPath>
+    </Reference>
+
+    <Reference Include="Comfort">
+        <HintPath>F:\SPT\EscapeFromTarkov_Data\Managed\Comfort.dll</HintPath>
+    </Reference>
+
+  </ItemGroup>
+
+  <!-- ✅ Ensure Harmony is Installed as a NuGet Package -->
+  <ItemGroup>
+    <PackageReference Include="HarmonyX" Version="2.9.0" />
+  </ItemGroup>
+
+  <!-- ✅ Correct MSBuild Import -->
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+
+</Project>
