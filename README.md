@@ -45,7 +45,7 @@ The mod attaches the enemy markers to an existing UI canvas in the game. If no s
 
 ## Logging
 
-The mod logs important events to a log file located at `F:\SPT\mymod.log`. This includes messages such as when the mod is loaded and when the updater starts.
+The mod logs important events to a log file located at `.\PantsMod.log`. This includes messages such as when the mod is loaded and when the updater starts.
 
 ## Contributing
 

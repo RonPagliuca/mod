@@ -127,11 +127,12 @@ public class PantsModUpdater : MonoBehaviour
             textRect.anchoredPosition = new Vector2(0, -15); // ✅ Aligns text under dot
 
             // Set text properties
-            enemyText.text = $"{enemy.Profile.Info.Settings.Role}"; // Set the text to the enemy's role.
+
+            enemyText.text = $"{enemy.Profile.Info.Settings.Role} - HP: {enemy.HealthController.GetBodyPartHealth(EBodyPart.Common).Current} - Level: {enemy.Profile.Info.Level}"; // Set the text to the enemy's role, health, and level.
             enemyText.fontSize = Mathf.RoundToInt(24 * scaleFactor); // Set the font size based on the scale factor.
             enemyText.color = new Color(1f, 1f, 1f, alpha); // Set the color of the text with the calculated transparency.
             enemyText.resizeTextForBestFit = true; // ✅ Auto-scale if needed
-            enemyText.resizeTextMinSize = 10; // Set the minimum font size.
+            enemyText.resizeTextMinSize = 8; // Set the minimum font size.
             enemyText.resizeTextMaxSize = 24; // Set the maximum font size.
             enemyText.horizontalOverflow = HorizontalWrapMode.Overflow; // ✅ Prevents wrapping
             enemyText.verticalOverflow = VerticalWrapMode.Overflow; // ✅ Ensures single-line text
