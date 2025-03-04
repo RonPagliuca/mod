@@ -26,7 +26,7 @@ Compress-Archive -Path "$outputPath/*" -DestinationPath $zipFilePath
 
 # Update the README file
 $readmeContent = Get-Content $readmeFilePath
-$updatedReadmeContent = $readmeContent -replace "\[releases page\]\(#\)", "[releases page](PantsMod.zip)"
+$updatedReadmeContent = $readmeContent -replace "\[Download Pants Mod\]\(PantsMod.zip\)", "[Download Pants Mod](./PantsMod.zip)"
 Set-Content $readmeFilePath -Value $updatedReadmeContent
 
 Write-Output "Build and packaging complete. README updated."
