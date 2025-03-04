@@ -1,0 +1,11 @@
+# Ignore Visual Studio and .NET build artifacts
+bin/
+obj/
+*.user
+*.suo
+*.cache
+*.log
+*.vs/
+.vscode/
+*.csproj.user
+*.nuget/
