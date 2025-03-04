@@ -1,0 +1,1 @@
+- Unzip in Plugins folder
