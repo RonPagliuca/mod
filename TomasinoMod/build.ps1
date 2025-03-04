@@ -1,7 +1,7 @@
 # Define paths
 $projectPath = "f:/SPTarkov-Custom-Mods/TomasinoMod"
 $outputPath = "f:/SPTarkov-Custom-Mods/TomasinoMod/bin/Release"
-$zipFilePath = "f:/SPTarkov-Custom-Mods/TomasinoMod/PantsMod.zip"
+$zipFilePath = "f:/SPTarkov-Custom-Mods/PantsMod.zip"
 $readmeFilePath = "f:/SPTarkov-Custom-Mods/README.md"
 
 # Clean previous build
@@ -11,6 +11,12 @@ if (Test-Path $outputPath) {
 
 # Build the project
 dotnet build $projectPath -c Release
+
+# Ensure the output directory exists
+if (-Not (Test-Path $outputPath)) {
+    Write-Error "Build output directory does not exist: $outputPath"
+    exit 1
+}
 
 # Create the ZIP file
 if (Test-Path $zipFilePath) {
