@@ -11,7 +11,7 @@ using System.Collections.Generic; // Importing generic collections.
 [BepInPlugin("com.tomasino.sptarkov.pantsmod", "Pants Mod", "1.0.0")]
 public class PantsMod : BaseUnityPlugin
 {
-    private static string logFilePath = @"F:\SPT\mymod.log"; // Path to the log file.
+    private static string logFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "PantsMod.log"); // Path to the log file.
 
     // Method to log messages to a file.
     public static void LogToFile(string message)
