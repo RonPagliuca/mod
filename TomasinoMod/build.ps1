@@ -1,69 +1,133 @@
-# Define paths
-$projectPath = "f:/SPTarkov-Custom-Mods/TomasinoMod"
-$outputPath = "f:/SPTarkov-Custom-Mods/TomasinoMod/bin/Release"
-$zipFilePath = "f:/SPTarkov-Custom-Mods/PantsMod.zip"
-$readmeFilePath = "f:/SPTarkov-Custom-Mods/README.md"
-$tempDir = "f:/SPTarkov-Custom-Mods/TomasinoMod/temp"
+<#
+  build.ps1
+  Run this script from the TomasinoMod folder (where the .csproj resides).
+#>
 
-# Clean previous build
-if (Test-Path $outputPath) {
-    Write-Output "Cleaning previous build..."
-    Remove-Item -Recurse -Force $outputPath
+# The folder containing build.ps1 (and the .csproj).
+$projectDir = $PSScriptRoot
+
+# The parent folder, which also contains BepInEx, EscapeFromTarkov_Data, etc.
+$rootDir = Split-Path $projectDir -Parent
+
+# Paths
+$projectFile    = Join-Path $projectDir "TomasinoMod.csproj"
+$outputPath     = Join-Path $projectDir "bin"
+$intermediatePath = Join-Path $projectDir "tempObj/"  # Must end with slash
+$tempDir        = Join-Path $projectDir "temp"
+
+# The ZIP and README live in the parent folder (so they're siblings with BepInEx).
+$zipFilePath    = Join-Path $rootDir "PantsMod.zip"
+$readmeFilePath = Join-Path $rootDir "README.md"
+
+# 1. Ensure the .csproj file exists
+if (-not (Test-Path $projectFile)) {
+    Write-Error "Project file not found: $projectFile"
+    exit 1
 }
 
-# Ensure no previous PantsMod.dll exists
-$existingDlls = Get-ChildItem -Path $projectPath -Recurse -Filter "PantsMod.dll"
+# 2. Clean up old bin and intermediate folders
+if (Test-Path $outputPath) {
+    Write-Output "Cleaning previous build folder..."
+    Remove-Item -Recurse -Force $outputPath
+}
+if (Test-Path $intermediatePath) {
+    Write-Output "Cleaning previous intermediate folder..."
+    Remove-Item -Recurse -Force $intermediatePath
+}
+
+# 3. Create bin folder if needed
+if (-not (Test-Path $outputPath)) {
+    Write-Output "Creating bin folder..."
+    New-Item -ItemType Directory -Path $outputPath | Out-Null
+}
+
+# 4. Remove any leftover PantsMod.dll in the project folder
+$existingDlls = Get-ChildItem -Path $projectDir -Recurse -Filter "PantsMod.dll"
 if ($existingDlls) {
-    Write-Output "Removing previous PantsMod.dll files..."
+    Write-Output "Removing old PantsMod.dll files..."
     $existingDlls | Remove-Item -Force
 }
 
-# Build the project
+# 5. Build the project in Release mode, overriding output to bin,
+#    and placing intermediate files in tempObj
 Write-Output "Building the project..."
-dotnet build $projectPath -c Release
+dotnet build $projectFile -c Release -o $outputPath -p:BaseIntermediateOutputPath=$intermediatePath
 
-# Ensure the output directory exists
-if (-Not (Test-Path $outputPath)) {
+# 6. Verify that bin folder now exists
+if (-not (Test-Path $outputPath)) {
     Write-Error "Build output directory does not exist: $outputPath"
     exit 1
 }
 
-# Ensure the PantsMod.dll exists
+# 7. Check if PantsMod.dll was created; if not, try to rename any single DLL found
 $dllPath = Join-Path $outputPath "PantsMod.dll"
-if (-Not (Test-Path $dllPath)) {
-    Write-Error "PantsMod.dll not found in the output directory: $dllPath"
+if (-not (Test-Path $dllPath)) {
+    Write-Output "PantsMod.dll not found. Searching for a single DLL in $outputPath..."
+    $dllFiles = Get-ChildItem -Path $outputPath -Filter *.dll -File
+    if ($dllFiles.Count -eq 1) {
+        $found = $dllFiles[0].Name
+        Write-Output "Renaming $found to PantsMod.dll..."
+        Rename-Item -Path $dllFiles[0].FullName -NewName "PantsMod.dll"
+    }
+}
+
+if (-not (Test-Path $dllPath)) {
+    Write-Error "PantsMod.dll not found in $outputPath"
     exit 1
 }
 
-# Prepare the temporary directory for the ZIP file
+# 8. Remove any extra files (keeping only PantsMod.dll)
+Get-ChildItem -Path $outputPath -File | Where-Object { $_.Name -ne "PantsMod.dll" } | ForEach-Object {
+    Write-Output "Removing extra file: $($_.Name)"
+    Remove-Item $_.FullName -Force
+}
+
+# 9. Clean up intermediate folder
+if (Test-Path $intermediatePath) {
+    Write-Output "Removing intermediate folder..."
+    Remove-Item -Recurse -Force $intermediatePath
+}
+
+# 10. Prepare the temp folder for packaging
 if (Test-Path $tempDir) {
-    Write-Output "Cleaning temporary directory..."
+    Write-Output "Removing old temp folder..."
     Remove-Item -Recurse -Force $tempDir
 }
-New-Item -ItemType Directory -Path $tempDir
-New-Item -ItemType Directory -Path (Join-Path $tempDir "BepInEx\plugins")
+New-Item -ItemType Directory -Path $tempDir | Out-Null
 
-# Copy the DLL to the temporary directory
-Copy-Item -Path $dllPath -Destination (Join-Path $tempDir "BepInEx\plugins")
+# 11. Create the BepInEx\plugins folder structure in temp
+$tempPluginsDir = Join-Path $tempDir "BepInEx\plugins"
+New-Item -ItemType Directory -Path $tempPluginsDir | Out-Null
 
-# Create the ZIP file with the correct directory structure
+# 12. Copy PantsMod.dll into the temp BepInEx\plugins folder
+Copy-Item -Path (Join-Path $outputPath "PantsMod.dll") -Destination $tempPluginsDir
+
+# 13. Create or overwrite PantsMod.zip in the parent folder
 if (Test-Path $zipFilePath) {
-    Write-Output "Removing existing ZIP file..."
+    Write-Output "Removing existing $zipFilePath..."
     Remove-Item -Force $zipFilePath
 }
-Write-Output "Creating ZIP file..."
+Write-Output "Creating ZIP: $zipFilePath"
 Compress-Archive -Path "$tempDir\*" -DestinationPath $zipFilePath
 
-# Verify the ZIP file was created
-if (-Not (Test-Path $zipFilePath)) {
+if (-not (Test-Path $zipFilePath)) {
     Write-Error "Failed to create ZIP file: $zipFilePath"
     exit 1
 }
 
-# Update the README file
-Write-Output "Updating README file..."
-$readmeContent = Get-Content $readmeFilePath
-$updatedReadmeContent = $readmeContent -replace "\[Download Pants Mod\]\(.*\)", "[Download Pants Mod](./PantsMod.zip)"
-Set-Content $readmeFilePath -Value $updatedReadmeContent
+# 14. Remove the temp packaging folder
+Write-Output "Removing temp folder..."
+Remove-Item -Recurse -Force $tempDir
 
-Write-Output "Build and packaging complete. README updated."
+# 15. Update README in the parent folder (if present)
+if (Test-Path $readmeFilePath) {
+    Write-Output "Updating README link..."
+    $readmeContent = Get-Content $readmeFilePath
+    $updatedReadmeContent = $readmeContent -replace "\[Download Pants Mod\]\(.*\)", "[Download Pants Mod](./PantsMod.zip)"
+    Set-Content $readmeFilePath -Value $updatedReadmeContent
+}
+else {
+    Write-Output "No README found at $readmeFilePath. Skipping update."
+}
+
+Write-Output "Build and packaging complete. Your PantsMod.dll is in bin, and PantsMod.zip is in $rootDir."
