@@ -38,7 +38,6 @@ public class PantsModUpdater : MonoBehaviour
 
     private void Start()
     {
-        PantsMod.LogToFile("🟢 PantsModUpdater started - Attaching to Game Canvas...");
         AttachToGameCanvas();
     }
 
@@ -83,7 +82,6 @@ public class PantsModUpdater : MonoBehaviour
             if (cam.name.Contains("FPS Camera") || cam.name.Contains("GameWorld"))
             {
                 mainCamera = cam;
-                PantsMod.LogToFile($"✅ Found EFT In-Game Camera: {mainCamera.name}");
                 return;
             }
         }
@@ -100,9 +98,22 @@ public class PantsModUpdater : MonoBehaviour
         foreach (var enemyMarker in enemyMarkers.Values)
             enemyMarker.SetActive(false);
 
-        var enemies = gameWorld.RegisteredPlayers
-            .Where(p => p.Profile?.Info?.Side == EPlayerSide.Savage && p.HealthController.IsAlive) // 🔹 Correct AI detection
-            .ToList();
+       List<Player> enemies = new List<Player>();
+
+        foreach (IPlayer iPlayer in gameWorld.RegisteredPlayers)
+        {
+            if (iPlayer is Player player) // ✅ Safe cast from IPlayer to Player
+            {
+                if ((player.Profile?.Info?.Side == EPlayerSide.Savage  // Scav AI
+                    || player.Profile?.Info?.Side == EPlayerSide.Bear  // Bear AI (Raiders, Boss Guards)
+                    || player.Profile?.Info?.Side == EPlayerSide.Usec) // USEC AI (Rogues, Boss Guards)
+                    && player.HealthController.IsAlive)
+                {
+                    enemies.Add(player);
+                }
+            }
+        }
+
 
         foreach (var enemy in enemies)
         {
