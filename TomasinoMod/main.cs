@@ -102,12 +102,12 @@ public class PantsModUpdater : MonoBehaviour
 
         foreach (IPlayer iPlayer in gameWorld.RegisteredPlayers)
         {
-            if (iPlayer is Player player) // ✅ Safe cast from IPlayer to Player
+            if (iPlayer is Player player) 
             {
-                if ((player.Profile?.Info?.Side == EPlayerSide.Savage  // Scav AI
-                    || player.Profile?.Info?.Side == EPlayerSide.Bear  // Bear AI (Raiders, Boss Guards)
-                    || player.Profile?.Info?.Side == EPlayerSide.Usec) // USEC AI (Rogues, Boss Guards)
-                    && player.HealthController.IsAlive)
+                if ((player.Profile?.Info?.Side == EPlayerSide.Savage  
+                    || player.Profile?.Info?.Side == EPlayerSide.Bear 
+                    || player.Profile?.Info?.Side == EPlayerSide.Usec) 
+                    && player.HealthController.IsAlive && player.AIData != null)
                 {
                     enemies.Add(player);
                 }
@@ -154,7 +154,8 @@ public class PantsModUpdater : MonoBehaviour
                 RectTransform textRect = textObj.AddComponent<RectTransform>();
                 textRect.anchorMin = new Vector2(0.5f, 0.5f);
                 textRect.anchorMax = new Vector2(0.5f, 0.5f);
-                textRect.anchoredPosition = new Vector2(0, -12);
+                textRect.anchoredPosition = new Vector2(0, 20); // Moves text above the red box
+                //textRect.anchoredPosition = new Vector2(0, -12);
 
                 Text text = textObj.AddComponent<Text>();
                 text.alignment = TextAnchor.MiddleCenter;
@@ -175,7 +176,47 @@ public class PantsModUpdater : MonoBehaviour
             rectTransform.anchoredPosition = screenPosition;
 
             Text enemyText = enemyMarkers[enemyId].GetComponentInChildren<Text>();
-            enemyText.text = $"{enemy.Profile.Info.Settings.Role} | HP: {enemy.HealthController.GetBodyPartHealth(EBodyPart.Common).Current} | Lvl {enemy.Profile.Info.Level} | {distance:F1}m";
+
+            // Get AI nickname
+            string aiNickname = enemy.Profile.Nickname;
+
+            // Convert AI role into a human-readable label
+            string newRoleString = enemy.Profile.Info.Settings.Role switch
+            {
+                WildSpawnType.assault => "Scav",   // Standard AI Scav
+                WildSpawnType.pmcBot => "Scav",    // AI PMC Bots (Raiders)
+                WildSpawnType.exUsec => "USEC",    // Rogue AI
+
+                // Boss Guards
+                WildSpawnType.followerBully or WildSpawnType.followerKojaniy or WildSpawnType.followerSanitar or 
+                WildSpawnType.followerTagilla => "Guard",
+
+                // Bosses (Names Stay)
+                WildSpawnType.bossBully or WildSpawnType.bossKojaniy or WildSpawnType.bossSanitar or 
+                WildSpawnType.bossTagilla or WildSpawnType.bossGluhar or WildSpawnType.bossKilla => enemy.Profile.Info.Settings.Role.ToString(),
+
+                // Cultists
+                WildSpawnType.sectantPriest or WildSpawnType.sectantWarrior => "Cultist",
+
+                // PMC AI (Bear / USEC)
+                _ when enemy.Profile.Info.Side == EPlayerSide.Bear => "Bear",
+                _ when enemy.Profile.Info.Side == EPlayerSide.Usec => "USEC",
+
+                _ => "Scav" // Default fallback
+            };
+
+            if (enemy.Profile.Info.Settings.Role.ToString().IndexOf("BTR", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                newRoleString = enemy.Profile.Info.Settings.Role.ToString();
+            }
+
+            // Format text for display
+            string displayText = $"{newRoleString}:{aiNickname}(lvl. {enemy.Profile.Info.Level})";
+
+            enemyText.text = $"{displayText} | HP: {enemy.HealthController.GetBodyPartHealth(EBodyPart.Common).Current} | {distance:F1}m";
+
+
+            // enemyText.text = $"{enemy.Profile.Info.Settings.Role} | HP: {enemy.HealthController.GetBodyPartHealth(EBodyPart.Common).Current} | L: {enemy.Profile.Info.Level} | {distance:F1}m";
             enemyText.fontSize = Mathf.RoundToInt(18 * scaleFactor);
             enemyText.color = textColor;
         }
