@@ -8,7 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Collections.Generic;
 
-[BepInPlugin("com.tomasino.sptarkov.pantsmod", "Pants Mod", "1.0.0")]
+[BepInPlugin("com.tomasino.sptarkov.pantsmod", "Pants Mod", "1.0.1")]
 public class PantsMod : BaseUnityPlugin
 {
     private static string logFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "PantsMod.log");
@@ -87,8 +87,6 @@ public class PantsModUpdater : MonoBehaviour
                 return;
             }
         }
-
-        
     }
 
     private void UpdateEnemyMarkers()
@@ -103,7 +101,7 @@ public class PantsModUpdater : MonoBehaviour
             enemyMarker.SetActive(false);
 
         var enemies = gameWorld.RegisteredPlayers
-            .Where(p => p.IsAI && p.HealthController.IsAlive)
+            .Where(p => p.Profile?.Info?.Side == EPlayerSide.Savage && p.HealthController.IsAlive) // 🔹 Correct AI detection
             .ToList();
 
         foreach (var enemy in enemies)
@@ -132,7 +130,7 @@ public class PantsModUpdater : MonoBehaviour
                 marker.transform.SetParent(uiCanvas.transform, false);
 
                 RectTransform markerRect = marker.AddComponent<RectTransform>();
-                markerRect.sizeDelta = new Vector2(8, 8); // ⬅ Red box size reduced by 50%
+                markerRect.sizeDelta = new Vector2(8, 8);
                 markerRect.anchorMin = new Vector2(0.5f, 0.5f);
                 markerRect.anchorMax = new Vector2(0.5f, 0.5f);
 
@@ -145,7 +143,7 @@ public class PantsModUpdater : MonoBehaviour
                 RectTransform textRect = textObj.AddComponent<RectTransform>();
                 textRect.anchorMin = new Vector2(0.5f, 0.5f);
                 textRect.anchorMax = new Vector2(0.5f, 0.5f);
-                textRect.anchoredPosition = new Vector2(0, -12); // ⬅ Moves text slightly below the red box
+                textRect.anchoredPosition = new Vector2(0, -12);
 
                 Text text = textObj.AddComponent<Text>();
                 text.alignment = TextAnchor.MiddleCenter;
@@ -157,16 +155,8 @@ public class PantsModUpdater : MonoBehaviour
             }
 
             float distance = Vector3.Distance(gameWorld.MainPlayer.Transform.position, enemy.Transform.position);
-
-            // 🔹 Adjust scale factor for smaller min/max font sizes
-            float scaleFactor = Mathf.Clamp(80f / distance, 0.4f, 1.2f);  // ⬅ Reduced max font size
-
-            // 🔹 Adjust transparency to remain slightly transparent even when close
-            // 🔹 Makes text much more transparent overall and even more when close
-            float alpha = Mathf.Clamp(0.1f + (distance / 300f), 0.05f, 0.6f);  
-
-
-            // 🔹 Change color to orange if enemy is within 50m
+            float scaleFactor = Mathf.Clamp(80f / distance, 0.4f, 1.2f);
+            float alpha = Mathf.Clamp(0.1f + (distance / 300f), 0.05f, 0.6f);
             Color textColor = (distance <= 50f) ? new Color(1f, 0.65f, 0f, alpha) : new Color(1f, 1f, 1f, alpha);
 
             enemyMarkers[enemyId].SetActive(true);
@@ -175,10 +165,8 @@ public class PantsModUpdater : MonoBehaviour
 
             Text enemyText = enemyMarkers[enemyId].GetComponentInChildren<Text>();
             enemyText.text = $"{enemy.Profile.Info.Settings.Role} | HP: {enemy.HealthController.GetBodyPartHealth(EBodyPart.Common).Current} | Lvl {enemy.Profile.Info.Level} | {distance:F1}m";
-            enemyText.fontSize = Mathf.RoundToInt(18 * scaleFactor); // ⬅ Reduced font max size
+            enemyText.fontSize = Mathf.RoundToInt(18 * scaleFactor);
             enemyText.color = textColor;
-
-
         }
     }
 
