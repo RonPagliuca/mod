@@ -8,7 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Collections.Generic;
 
-[BepInPlugin("com.tomasino.sptarkov.pantsmod", "Pants Mod", "3.11.0")]
+[BepInPlugin("com.tomasino.sptarkov.pantsmod", "Pants Mod", "3.11.1")]
 public class PantsMod : BaseUnityPlugin
 {
     private static string logFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "PantsMod.log");
@@ -165,8 +165,11 @@ public class PantsModUpdater : MonoBehaviour
             }
 
             float distance = Vector3.Distance(gameWorld.MainPlayer.Transform.position, enemy.Transform.position);
+            // Size of the text calculation based on distance.
             float scaleFactor = Mathf.Clamp(80f / distance, 0.4f, 1.2f);
+            // Transparency of the text based on distance.
             float alpha = Mathf.Clamp(0.1f + (distance / 300f), 0.05f, 0.6f);
+            // Color of the text based on distance <=50f (orange) or >50f (white).
             Color textColor = (distance <= 50f) ? new Color(1f, 0.65f, 0f, alpha) : new Color(1f, 1f, 1f, alpha);
 
             enemyMarkers[enemyId].SetActive(true);
