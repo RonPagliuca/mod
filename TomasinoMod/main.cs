@@ -8,7 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Collections.Generic;
 
-[BepInPlugin("com.tomasino.sptarkov.pantsmod", "Pants Mod", "1.0.1")]
+[BepInPlugin("com.tomasino.sptarkov.pantsmod", "Pants Mod", "3.11.0")]
 public class PantsMod : BaseUnityPlugin
 {
     private static string logFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "PantsMod.log");
@@ -98,22 +98,21 @@ public class PantsModUpdater : MonoBehaviour
         foreach (var enemyMarker in enemyMarkers.Values)
             enemyMarker.SetActive(false);
 
-       List<Player> enemies = new List<Player>();
+        List<Player> enemies = new List<Player>();
 
         foreach (IPlayer iPlayer in gameWorld.RegisteredPlayers)
         {
-            if (iPlayer is Player player) 
+            if (iPlayer is Player player)
             {
-                if ((player.Profile?.Info?.Side == EPlayerSide.Savage  
-                    || player.Profile?.Info?.Side == EPlayerSide.Bear 
-                    || player.Profile?.Info?.Side == EPlayerSide.Usec) 
+                if ((player.Profile?.Info?.Side == EPlayerSide.Savage
+                    || player.Profile?.Info?.Side == EPlayerSide.Bear
+                    || player.Profile?.Info?.Side == EPlayerSide.Usec)
                     && player.HealthController.IsAlive && player.AIData != null)
                 {
                     enemies.Add(player);
                 }
             }
         }
-
 
         foreach (var enemy in enemies)
         {
@@ -155,7 +154,6 @@ public class PantsModUpdater : MonoBehaviour
                 textRect.anchorMin = new Vector2(0.5f, 0.5f);
                 textRect.anchorMax = new Vector2(0.5f, 0.5f);
                 textRect.anchoredPosition = new Vector2(0, 20); // Moves text above the red box
-                //textRect.anchoredPosition = new Vector2(0, -12);
 
                 Text text = textObj.AddComponent<Text>();
                 text.alignment = TextAnchor.MiddleCenter;
@@ -188,12 +186,13 @@ public class PantsModUpdater : MonoBehaviour
                 WildSpawnType.exUsec => "USEC",    // Rogue AI
 
                 // Boss Guards
-                WildSpawnType.followerBully or WildSpawnType.followerKojaniy or WildSpawnType.followerSanitar or 
+                WildSpawnType.followerBully or WildSpawnType.followerKojaniy or WildSpawnType.followerSanitar or
                 WildSpawnType.followerTagilla => "Guard",
 
                 // Bosses (Names Stay)
-                WildSpawnType.bossBully or WildSpawnType.bossKojaniy or WildSpawnType.bossSanitar or 
-                WildSpawnType.bossTagilla or WildSpawnType.bossGluhar or WildSpawnType.bossKilla => enemy.Profile.Info.Settings.Role.ToString(),
+                WildSpawnType.bossBully or WildSpawnType.bossKojaniy or WildSpawnType.bossSanitar or
+                WildSpawnType.bossTagilla or WildSpawnType.bossGluhar or WildSpawnType.bossKilla
+                    => enemy.Profile.Info.Settings.Role.ToString(),
 
                 // Cultists
                 WildSpawnType.sectantPriest or WildSpawnType.sectantWarrior => "Cultist",
@@ -214,9 +213,6 @@ public class PantsModUpdater : MonoBehaviour
             string displayText = $"{newRoleString}:{aiNickname}(lvl. {enemy.Profile.Info.Level})";
 
             enemyText.text = $"{displayText} | HP: {enemy.HealthController.GetBodyPartHealth(EBodyPart.Common).Current} | {distance:F1}m";
-
-
-            // enemyText.text = $"{enemy.Profile.Info.Settings.Role} | HP: {enemy.HealthController.GetBodyPartHealth(EBodyPart.Common).Current} | L: {enemy.Profile.Info.Level} | {distance:F1}m";
             enemyText.fontSize = Mathf.RoundToInt(18 * scaleFactor);
             enemyText.color = textColor;
         }
