@@ -57,7 +57,7 @@ public class PantsModUpdater : MonoBehaviour
             PantsMod.LogToFile($"⚙ PantsModUpdater functionality {(isEnabled ? "enabled" : "disabled")}");
         }
 
-        if (Input.GetKey(KeyCode.LeftControl) && Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.L))
+        if (Input.GetKey(KeyCode.LeftControl) && Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.H))
         {
             showText = !showText;
             PantsMod.LogToFile($"⚙ PantsModUpdater text portion {(showText ? "shown" : "hidden")}");
