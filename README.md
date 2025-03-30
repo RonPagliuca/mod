@@ -10,7 +10,7 @@ Pants Mod is a plugin for SPTarkov, a single-player mod for Escape From Tarkov. 
 - **Distance-Based Scaling**: Marker size adjusts based on the distance to the enemy.
 - **Distance-Based Transparency and Color**: Marker transparency adjusts based on the distance to the enemy.
 - **Stats Display**: Shows the role of the enemy (e.g., Scav, Raider), distance, hp, and level on the marker.
-- **Toggle Effect**: Using ctrl-shift-m turn toggle markers off and on.
+- **Toggle Effect**: Using left-ctrl-shift-m turn toggle markers off and on. left-ctrl-shift-h to hide text.
 - **Head Marker**: Red Box marker aligns somewhat to enemy head.
 
 ## Installation
