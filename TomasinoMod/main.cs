@@ -34,6 +34,7 @@ public class PantsModUpdater : MonoBehaviour
     private GameObject uiCanvas = null;
     private Dictionary<int, GameObject> enemyMarkers = new Dictionary<int, GameObject>();
     private bool isEnabled = true;
+    private bool showText = true; // Toggle for showing/hiding text only
     private Camera mainCamera;
 
     private void Start()
@@ -54,6 +55,12 @@ public class PantsModUpdater : MonoBehaviour
         {
             isEnabled = !isEnabled;
             PantsMod.LogToFile($"⚙ PantsModUpdater functionality {(isEnabled ? "enabled" : "disabled")}");
+        }
+
+        if (Input.GetKey(KeyCode.LeftControl) && Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.L))
+        {
+            showText = !showText;
+            PantsMod.LogToFile($"⚙ PantsModUpdater text portion {(showText ? "shown" : "hidden")}");
         }
 
         if (!isEnabled)
@@ -127,7 +134,6 @@ public class PantsModUpdater : MonoBehaviour
                 continue;
             }
 
-            // Convert viewport position to UI coordinates
             Vector2 screenPosition = new Vector2(
                 (viewportPosition.x * uiCanvas.GetComponent<RectTransform>().sizeDelta.x) - (uiCanvas.GetComponent<RectTransform>().sizeDelta.x / 2),
                 (viewportPosition.y * uiCanvas.GetComponent<RectTransform>().sizeDelta.y) - (uiCanvas.GetComponent<RectTransform>().sizeDelta.y / 2)
@@ -153,7 +159,7 @@ public class PantsModUpdater : MonoBehaviour
                 RectTransform textRect = textObj.AddComponent<RectTransform>();
                 textRect.anchorMin = new Vector2(0.5f, 0.5f);
                 textRect.anchorMax = new Vector2(0.5f, 0.5f);
-                textRect.anchoredPosition = new Vector2(0, 20); // Moves text above the red box
+                textRect.anchoredPosition = new Vector2(0, 20);
 
                 Text text = textObj.AddComponent<Text>();
                 text.alignment = TextAnchor.MiddleCenter;
@@ -178,46 +184,34 @@ public class PantsModUpdater : MonoBehaviour
 
             Text enemyText = enemyMarkers[enemyId].GetComponentInChildren<Text>();
 
-            // Get AI nickname
             string aiNickname = enemy.Profile.Nickname;
-
-            // Convert AI role into a human-readable label
             string newRoleString = enemy.Profile.Info.Settings.Role switch
             {
-                WildSpawnType.assault => "Scav",   // Standard AI Scav
-                WildSpawnType.pmcBot => "Scav",    // AI PMC Bots (Raiders)
-                WildSpawnType.exUsec => "USEC",    // Rogue AI
-
-                // Boss Guards
-                WildSpawnType.followerBully or WildSpawnType.followerKojaniy or WildSpawnType.followerSanitar or
-                WildSpawnType.followerTagilla => "Guard",
-
-                // Bosses (Names Stay)
-                WildSpawnType.bossBully or WildSpawnType.bossKojaniy or WildSpawnType.bossSanitar or
-                WildSpawnType.bossTagilla or WildSpawnType.bossGluhar or WildSpawnType.bossKilla
+                WildSpawnType.assault => "Scav",
+                WildSpawnType.pmcBot => "Scav",
+                WildSpawnType.exUsec => "USEC",
+                WildSpawnType.followerBully or WildSpawnType.followerKojaniy or WildSpawnType.followerSanitar or WildSpawnType.followerTagilla => "Guard",
+                WildSpawnType.bossBully or WildSpawnType.bossKojaniy or WildSpawnType.bossSanitar or WildSpawnType.bossTagilla or WildSpawnType.bossGluhar or WildSpawnType.bossKilla
                     => enemy.Profile.Info.Settings.Role.ToString(),
-
-                // Cultists
                 WildSpawnType.sectantPriest or WildSpawnType.sectantWarrior => "Cultist",
-
-                // PMC AI (Bear / USEC)
                 _ when enemy.Profile.Info.Side == EPlayerSide.Bear => "Bear",
                 _ when enemy.Profile.Info.Side == EPlayerSide.Usec => "USEC",
-
-                _ => "Scav" // Default fallback
+                _ => "Scav"
             };
 
-            if (enemy.Profile.Info.Settings.Role.ToString().IndexOf("BTR", StringComparison.OrdinalIgnoreCase) >= 0)
-            {
-                newRoleString = enemy.Profile.Info.Settings.Role.ToString();
-            }
-
-            // Format text for display
             string displayText = $"{newRoleString}:{aiNickname}(lvl. {enemy.Profile.Info.Level})";
-
-            enemyText.text = $"{displayText} | HP: {enemy.HealthController.GetBodyPartHealth(EBodyPart.Common).Current} | {distance:F1}m";
             enemyText.fontSize = Mathf.RoundToInt(18 * scaleFactor);
             enemyText.color = textColor;
+
+            if (showText)
+            {
+                enemyText.enabled = true;
+                enemyText.text = $"{displayText} | HP: {enemy.HealthController.GetBodyPartHealth(EBodyPart.Common).Current} | {distance:F1}m";
+            }
+            else
+            {
+                enemyText.enabled = false;
+            }
         }
     }
 
