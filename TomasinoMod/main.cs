@@ -34,7 +34,7 @@ public class PantsModUpdater : MonoBehaviour
     private GameObject uiCanvas = null;
     private Dictionary<int, GameObject> enemyMarkers = new Dictionary<int, GameObject>();
     private bool isEnabled = true;
-    private bool showText = true; // Toggle for showing/hiding text only
+    private bool showText = true;
     private Camera mainCamera;
 
     private void Start()
@@ -47,9 +47,7 @@ public class PantsModUpdater : MonoBehaviour
         FindEFTCamera();
 
         if (mainCamera == null)
-        {
             return;
-        }
 
         if (Input.GetKey(KeyCode.LeftControl) && Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.M))
         {
@@ -71,9 +69,7 @@ public class PantsModUpdater : MonoBehaviour
         }
 
         if (Singleton<GameWorld>.Instance == null || Singleton<GameWorld>.Instance.MainPlayer == null)
-        {
             return;
-        }
 
         UpdateEnemyMarkers();
     }
@@ -83,8 +79,7 @@ public class PantsModUpdater : MonoBehaviour
         if (mainCamera != null)
             return;
 
-        var allCameras = FindObjectsOfType<Camera>();
-        foreach (var cam in allCameras)
+        foreach (var cam in FindObjectsOfType<Camera>())
         {
             if (cam.name.Contains("FPS Camera") || cam.name.Contains("GameWorld"))
             {
@@ -98,28 +93,15 @@ public class PantsModUpdater : MonoBehaviour
     {
         var gameWorld = Singleton<GameWorld>.Instance;
         if (gameWorld == null || gameWorld.MainPlayer == null || mainCamera == null || uiCanvas == null)
-        {
             return;
-        }
 
         foreach (var enemyMarker in enemyMarkers.Values)
             enemyMarker.SetActive(false);
 
-        List<Player> enemies = new List<Player>();
-
-        foreach (IPlayer iPlayer in gameWorld.RegisteredPlayers)
-        {
-            if (iPlayer is Player player)
-            {
-                if ((player.Profile?.Info?.Side == EPlayerSide.Savage
-                    || player.Profile?.Info?.Side == EPlayerSide.Bear
-                    || player.Profile?.Info?.Side == EPlayerSide.Usec)
-                    && player.HealthController.IsAlive && player.AIData != null)
-                {
-                    enemies.Add(player);
-                }
-            }
-        }
+        List<Player> enemies = gameWorld.RegisteredPlayers
+            .OfType<Player>()
+            .Where(player => player.AIData != null) // include alive and dead with AI
+            .ToList();
 
         foreach (var enemy in enemies)
         {
@@ -130,9 +112,7 @@ public class PantsModUpdater : MonoBehaviour
             Vector3 viewportPosition = mainCamera.WorldToViewportPoint(headPosition);
 
             if (viewportPosition.z < 0)
-            {
                 continue;
-            }
 
             Vector2 screenPosition = new Vector2(
                 (viewportPosition.x * uiCanvas.GetComponent<RectTransform>().sizeDelta.x) - (uiCanvas.GetComponent<RectTransform>().sizeDelta.x / 2),
@@ -170,25 +150,27 @@ public class PantsModUpdater : MonoBehaviour
                 enemyMarkers[enemyId] = marker;
             }
 
-            float distance = Vector3.Distance(gameWorld.MainPlayer.Transform.position, enemy.Transform.position);
-            // Size of the text calculation based on distance.
-            float scaleFactor = Mathf.Clamp(80f / distance, 0.4f, 1.2f);
-            // Transparency of the text based on distance.
-            float alpha = Mathf.Clamp(0.1f + (distance / 300f), 0.05f, 0.6f);
-            // Color of the text based on distance <=50f (orange) or >50f (white).
-            Color textColor = (distance <= 50f) ? new Color(1f, 0.65f, 0f, alpha) : new Color(1f, 1f, 1f, alpha);
-
-            enemyMarkers[enemyId].SetActive(true);
-            RectTransform rectTransform = enemyMarkers[enemyId].GetComponent<RectTransform>();
+            GameObject markerGO = enemyMarkers[enemyId];
+            markerGO.SetActive(true);
+            RectTransform rectTransform = markerGO.GetComponent<RectTransform>();
             rectTransform.anchoredPosition = screenPosition;
 
-            Text enemyText = enemyMarkers[enemyId].GetComponentInChildren<Text>();
+            // Set marker color based on alive/dead
+            var img = markerGO.GetComponent<Image>();
+            img.color = enemy.HealthController.IsAlive ? Color.red : Color.yellow;
+
+            Text enemyText = markerGO.GetComponentInChildren<Text>();
+
+            float distance = Vector3.Distance(gameWorld.MainPlayer.Transform.position, enemy.Transform.position);
+            float scaleFactor = Mathf.Clamp(80f / distance, 0.4f, 1.2f);
+            float alpha = Mathf.Clamp(0.1f + (distance / 300f), 0.05f, 0.6f);
+            Color textColor = (distance <= 50f) ? new Color(1f, 0.65f, 0f, alpha) : new Color(1f, 1f, 1f, alpha);
 
             string aiNickname = enemy.Profile.Nickname;
             string newRoleString = enemy.Profile.Info.Settings.Role switch
             {
                 WildSpawnType.assault => "Scav",
-                WildSpawnType.pmcBot => "Scav",
+                WildSpawnType.pmcBot => "Bear",
                 WildSpawnType.exUsec => "USEC",
                 WildSpawnType.followerBully or WildSpawnType.followerKojaniy or WildSpawnType.followerSanitar or WildSpawnType.followerTagilla => "Guard",
                 WildSpawnType.bossBully or WildSpawnType.bossKojaniy or WildSpawnType.bossSanitar or WildSpawnType.bossTagilla or WildSpawnType.bossGluhar or WildSpawnType.bossKilla
@@ -200,8 +182,6 @@ public class PantsModUpdater : MonoBehaviour
             };
 
             string displayText = $"{newRoleString}:{aiNickname}(lvl. {enemy.Profile.Info.Level})";
-            enemyText.fontSize = Mathf.RoundToInt(18 * scaleFactor);
-            enemyText.color = textColor;
 
             if (showText)
             {
@@ -212,6 +192,9 @@ public class PantsModUpdater : MonoBehaviour
             {
                 enemyText.enabled = false;
             }
+
+            enemyText.fontSize = Mathf.RoundToInt(18 * scaleFactor);
+            enemyText.color = textColor;
         }
     }
 
