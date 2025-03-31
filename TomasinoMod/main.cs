@@ -89,7 +89,7 @@ public class PantsModUpdater : MonoBehaviour
         }
     }
 
-    private void UpdateEnemyMarkers()
+   private void UpdateEnemyMarkers()
     {
         var gameWorld = Singleton<GameWorld>.Instance;
         if (gameWorld == null || gameWorld.MainPlayer == null || mainCamera == null || uiCanvas == null)
@@ -98,9 +98,14 @@ public class PantsModUpdater : MonoBehaviour
         foreach (var enemyMarker in enemyMarkers.Values)
             enemyMarker.SetActive(false);
 
+        // ✅ Include all players (alive or dead) that are AI-controlled and enemy
         List<Player> enemies = gameWorld.RegisteredPlayers
             .OfType<Player>()
-            .Where(player => player.AIData != null) // include alive and dead with AI
+            .Where(player =>
+                player.AIData != null &&
+                (player.Profile.Info.Side == EPlayerSide.Savage ||
+                player.Profile.Info.Side == EPlayerSide.Bear ||
+                player.Profile.Info.Side == EPlayerSide.Usec))
             .ToList();
 
         foreach (var enemy in enemies)
@@ -131,7 +136,7 @@ public class PantsModUpdater : MonoBehaviour
                 markerRect.anchorMax = new Vector2(0.5f, 0.5f);
 
                 Image image = marker.AddComponent<Image>();
-                image.color = Color.red;
+                image.color = Color.red; // Default color
 
                 GameObject textObj = new GameObject("EnemyText");
                 textObj.transform.SetParent(marker.transform, false);
@@ -155,9 +160,9 @@ public class PantsModUpdater : MonoBehaviour
             RectTransform rectTransform = markerGO.GetComponent<RectTransform>();
             rectTransform.anchoredPosition = screenPosition;
 
-            // Set marker color based on alive/dead
-            var img = markerGO.GetComponent<Image>();
-            img.color = enemy.HealthController.IsAlive ? Color.red : Color.yellow;
+            // ✅ Color the marker yellow if dead
+            Image markerImage = markerGO.GetComponent<Image>();
+            markerImage.color = enemy.HealthController.IsAlive ? Color.red : Color.yellow;
 
             Text enemyText = markerGO.GetComponentInChildren<Text>();
 
@@ -197,6 +202,7 @@ public class PantsModUpdater : MonoBehaviour
             enemyText.color = textColor;
         }
     }
+
 
     private void AttachToGameCanvas()
     {
