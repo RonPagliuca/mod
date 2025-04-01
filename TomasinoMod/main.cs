@@ -34,7 +34,7 @@ public class PantsModUpdater : MonoBehaviour
     private GameObject uiCanvas = null;
     private Dictionary<int, GameObject> enemyMarkers = new Dictionary<int, GameObject>();
     private bool isEnabled = true;
-    private bool showText = true;
+    private bool showText = true; // Toggle for showing/hiding text only
     private Camera mainCamera;
 
     private void Start()
@@ -47,7 +47,9 @@ public class PantsModUpdater : MonoBehaviour
         FindEFTCamera();
 
         if (mainCamera == null)
+        {
             return;
+        }
 
         if (Input.GetKey(KeyCode.LeftControl) && Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.M))
         {
@@ -69,7 +71,9 @@ public class PantsModUpdater : MonoBehaviour
         }
 
         if (Singleton<GameWorld>.Instance == null || Singleton<GameWorld>.Instance.MainPlayer == null)
+        {
             return;
+        }
 
         UpdateEnemyMarkers();
     }
@@ -79,7 +83,8 @@ public class PantsModUpdater : MonoBehaviour
         if (mainCamera != null)
             return;
 
-        foreach (var cam in FindObjectsOfType<Camera>())
+        var allCameras = FindObjectsOfType<Camera>();
+        foreach (var cam in allCameras)
         {
             if (cam.name.Contains("FPS Camera") || cam.name.Contains("GameWorld"))
             {
@@ -89,24 +94,32 @@ public class PantsModUpdater : MonoBehaviour
         }
     }
 
-   private void UpdateEnemyMarkers()
+    private void UpdateEnemyMarkers()
     {
         var gameWorld = Singleton<GameWorld>.Instance;
         if (gameWorld == null || gameWorld.MainPlayer == null || mainCamera == null || uiCanvas == null)
+        {
             return;
+        }
 
         foreach (var enemyMarker in enemyMarkers.Values)
             enemyMarker.SetActive(false);
 
-        // ✅ Include all players (alive or dead) that are AI-controlled and enemy
-        List<Player> enemies = gameWorld.RegisteredPlayers
-            .OfType<Player>()
-            .Where(player =>
-                player.AIData != null &&
-                (player.Profile.Info.Side == EPlayerSide.Savage ||
-                player.Profile.Info.Side == EPlayerSide.Bear ||
-                player.Profile.Info.Side == EPlayerSide.Usec))
-            .ToList();
+        List<Player> enemies = new List<Player>();
+
+        foreach (IPlayer iPlayer in gameWorld.RegisteredPlayers)
+        {
+            if (iPlayer is Player player)
+            {
+                if ((player.Profile?.Info?.Side == EPlayerSide.Savage
+                    || player.Profile?.Info?.Side == EPlayerSide.Bear
+                    || player.Profile?.Info?.Side == EPlayerSide.Usec)
+                    && player.HealthController.IsAlive && player.AIData != null)
+                {
+                    enemies.Add(player);
+                }
+            }
+        }
 
         foreach (var enemy in enemies)
         {
@@ -117,7 +130,9 @@ public class PantsModUpdater : MonoBehaviour
             Vector3 viewportPosition = mainCamera.WorldToViewportPoint(headPosition);
 
             if (viewportPosition.z < 0)
+            {
                 continue;
+            }
 
             Vector2 screenPosition = new Vector2(
                 (viewportPosition.x * uiCanvas.GetComponent<RectTransform>().sizeDelta.x) - (uiCanvas.GetComponent<RectTransform>().sizeDelta.x / 2),
@@ -136,7 +151,7 @@ public class PantsModUpdater : MonoBehaviour
                 markerRect.anchorMax = new Vector2(0.5f, 0.5f);
 
                 Image image = marker.AddComponent<Image>();
-                image.color = Color.red; // Default color
+                image.color = Color.red;
 
                 GameObject textObj = new GameObject("EnemyText");
                 textObj.transform.SetParent(marker.transform, false);
@@ -155,27 +170,25 @@ public class PantsModUpdater : MonoBehaviour
                 enemyMarkers[enemyId] = marker;
             }
 
-            GameObject markerGO = enemyMarkers[enemyId];
-            markerGO.SetActive(true);
-            RectTransform rectTransform = markerGO.GetComponent<RectTransform>();
+            float distance = Vector3.Distance(gameWorld.MainPlayer.Transform.position, enemy.Transform.position);
+            // Size of the text calculation based on distance.
+            float scaleFactor = Mathf.Clamp(80f / distance, 0.4f, 1.2f);
+            // Transparency of the text based on distance.
+            float alpha = Mathf.Clamp(0.1f + (distance / 300f), 0.05f, 0.6f);
+            // Color of the text based on distance <=50f (orange) or >50f (white).
+            Color textColor = (distance <= 50f) ? new Color(1f, 0.65f, 0f, alpha) : new Color(1f, 1f, 1f, alpha);
+
+            enemyMarkers[enemyId].SetActive(true);
+            RectTransform rectTransform = enemyMarkers[enemyId].GetComponent<RectTransform>();
             rectTransform.anchoredPosition = screenPosition;
 
-            // ✅ Color the marker yellow if dead
-            Image markerImage = markerGO.GetComponent<Image>();
-            markerImage.color = enemy.HealthController.IsAlive ? Color.red : Color.yellow;
-
-            Text enemyText = markerGO.GetComponentInChildren<Text>();
-
-            float distance = Vector3.Distance(gameWorld.MainPlayer.Transform.position, enemy.Transform.position);
-            float scaleFactor = Mathf.Clamp(80f / distance, 0.4f, 1.2f);
-            float alpha = Mathf.Clamp(0.1f + (distance / 300f), 0.05f, 0.6f);
-            Color textColor = (distance <= 50f) ? new Color(1f, 0.65f, 0f, alpha) : new Color(1f, 1f, 1f, alpha);
+            Text enemyText = enemyMarkers[enemyId].GetComponentInChildren<Text>();
 
             string aiNickname = enemy.Profile.Nickname;
             string newRoleString = enemy.Profile.Info.Settings.Role switch
             {
                 WildSpawnType.assault => "Scav",
-                WildSpawnType.pmcBot => "Bear",
+                WildSpawnType.pmcBot => "PMC",
                 WildSpawnType.exUsec => "USEC",
                 WildSpawnType.followerBully or WildSpawnType.followerKojaniy or WildSpawnType.followerSanitar or WildSpawnType.followerTagilla => "Guard",
                 WildSpawnType.bossBully or WildSpawnType.bossKojaniy or WildSpawnType.bossSanitar or WildSpawnType.bossTagilla or WildSpawnType.bossGluhar or WildSpawnType.bossKilla
@@ -187,6 +200,8 @@ public class PantsModUpdater : MonoBehaviour
             };
 
             string displayText = $"{newRoleString}:{aiNickname}(lvl. {enemy.Profile.Info.Level})";
+            enemyText.fontSize = Mathf.RoundToInt(18 * scaleFactor);
+            enemyText.color = textColor;
 
             if (showText)
             {
@@ -197,12 +212,8 @@ public class PantsModUpdater : MonoBehaviour
             {
                 enemyText.enabled = false;
             }
-
-            enemyText.fontSize = Mathf.RoundToInt(18 * scaleFactor);
-            enemyText.color = textColor;
         }
     }
-
 
     private void AttachToGameCanvas()
     {
